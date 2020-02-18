@@ -1,0 +1,7 @@
+---
+- name: "install configuration proxy"
+  apt:
+    name: xroad-confproxy
+    state: latest
+    force: yes
+  when: ansible_os_family == "Debian"

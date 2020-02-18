@@ -1,0 +1,54 @@
+---
+# This playbook compiles X-Road and installs the compiled version
+
+
+- hosts: lxd-servers
+  roles:
+    - init-lxd
+  tags: 
+    - init
+        
+- hosts: compile-servers
+  vars_files:
+    - vars_files/common_modules.yml
+    - vars_files/cs_modules.yml
+    - vars_files/cp_modules.yml
+    - vars_files/ss_modules.yml
+  roles:
+    - { role: compile-module, modules: "{{common_modules | combine(cs_modules,cp_modules,ss_modules)  }}"}
+  tags: 
+    - compile
+
+- hosts: cs-servers
+  vars_files:
+    - vars_files/common_modules.yml
+    - vars_files/cs_modules.yml
+  roles:
+    - { role: packages-to-server, modules: "{{common_modules | combine(cs_modules) }}"}
+  tags:
+    - packages
+
+- hosts: cp-servers
+  vars_files:
+    - vars_files/common_modules.yml
+    - vars_files/cp_modules.yml
+  roles:
+    - { role: packages-to-server, modules: "{{common_modules | combine(cp_modules) }}"}
+  tags:
+    - packages
+
+- hosts: ss-servers
+  vars_files:
+    - vars_files/common_modules.yml
+    - vars_files/ss_modules.yml
+  roles:
+    - { role: packages-to-server, modules: "{{common_modules | combine(ss_modules) }}"}
+  tags:
+    - packages
+
+
+- hosts: lxd-servers
+  roles:
+    - restart-lxd
+  tags:
+    - restart

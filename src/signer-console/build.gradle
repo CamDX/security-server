@@ -1,0 +1,39 @@
+
+plugins {
+  id 'com.github.johnrengelman.shadow' version '4.0.4'
+}
+
+dependencies {
+    compile 'commons-cli:commons-cli:1.4'
+    compile 'com.googlecode.clichemaven:cliche:110413'
+
+    compile project(':signer-protocol')
+}
+
+ext {
+  mainClassName = 'ee.ria.xroad.signer.console.SignerCLI'
+}
+
+jar {
+  manifest {
+    attributes  'Main-Class': mainClassName
+  }
+}
+
+shadowJar {
+    classifier = ''
+    exclude 'asg/cliche/example/**'
+    append('reference.conf')
+    from rootProject.file("LICENSE.txt")
+}
+
+jar.enabled = false
+build.dependsOn shadowJar
+buildall.dependsOn shadowJar
+
+task runSignerConsole(type: JavaExec) {
+    jvmArgs '-Djava.library.path=../passwordstore'
+    main = 'ee.ria.xroad.signer.console.SignerCLI'
+    classpath = sourceSets.test.runtimeClasspath
+    standardInput = System.in;
+}

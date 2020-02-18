@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<xroad:group id:objectType="LOCALGROUP"
+        xmlns:xroad="http://x-road.eu/xsd/xroad.xsd"
+        xmlns:id="http://x-road.eu/xsd/identifiers">
+    <id:groupCode>lokaalgrupp</id:groupCode>
+</xroad:group>
+

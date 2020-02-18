@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':signer')
+
+    // Necessary since there are jars with no adequate Maven dependencies
+    compile fileTree(dir: '../libs', include: '*.jar')
+}

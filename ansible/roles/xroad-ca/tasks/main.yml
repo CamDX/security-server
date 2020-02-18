@@ -1,0 +1,157 @@
+---
+- name: check that OS is supported
+  fail:
+    msg: "This playbook only supports Ubuntu"
+  when: ansible_os_family != "Debian"
+
+- name: install required packages
+  package:
+      name: "{{ item }}"
+      state: present
+  with_items:
+    - "acl"
+    - "nginx-light"
+
+- name: group ca
+  group:
+    name: "ca"
+    system: "yes"
+
+- name: ca user
+  user:
+    name: "ca"
+    group: "ca"
+    comment: "CA user"
+    createhome: "yes"
+    system: "yes"
+
+- name: ocsp user
+  user:
+    name: "ocsp"
+    group: "ca"
+    comment: "OCSP user"
+    createhome: "yes"
+    system: "yes"
+
+- name: copy root user directories
+  copy:
+    src: "common-files/{{ item }}"
+    dest: /
+    group: "root"
+    owner: "root"
+  with_items:
+    - "etc"
+    - "usr"
+
+- name: copy root user directories for bionic
+  copy:
+    src: "bionic-files/{{ item }}"
+    dest: /
+    group: "root"
+    owner: "root"
+  with_items:
+    - "lib"
+  when: ansible_distribution_release == "bionic"
+
+- name: copy ca group directories
+  copy:
+    src: "common-files/{{ item }}"
+    dest: /home
+    group: "ca"
+    owner: "ca"
+  with_items:
+    - "home/ca"
+
+- name: set file permissions
+  file:
+    mode: 0755
+    path: "/usr/local/bin/{{ item }}"
+  with_items:
+    - "sign"
+    - "sign-auth"
+    - "sign-sign"
+    - "ca-revoke"
+
+- name: set file permissions 2
+  file:
+    mode: 0740
+    path: "/home/ca/CA/{{ item }}"
+  with_items:
+    - "ocsp.sh"
+    - "revoke.sh"
+    - "sign.sh"
+    - "intermediate.sh"
+    - "ocsp.py"
+    - "ca.py"
+    - "sign_req.sh"
+
+- name: set file permissions 3
+  file:
+    mode: 0664
+    path: "/home/ca/TSA/{{ item }}"
+  with_items:
+    - "TSA.cnf"
+    - "tsa_server.py"
+
+- name: init.sh template
+  template:
+    src: "init.sh"
+    dest: "/home/ca/CA/init.sh"
+    owner: "ca"
+    group: "ca"
+    mode: 0700
+
+- name: check if ocsp.log exists
+  stat:
+    path: /var/log/ocsp.log
+  register: stat_result
+
+- name: create ocsp.log
+  file:
+    path: /var/log/ocsp.log
+    state: touch
+    group: "ca"
+    owner: "ca"
+    mode: 0664
+  when: stat_result.stat.exists == False
+
+- name: check if .init exists
+  stat:
+    path: /home/ca/CA/.init
+  register: stat_result
+
+- name: run init.sh
+  shell: ./init.sh > init.log 2>&1
+  args:
+    chdir: "/home/ca/CA"
+  become: true
+  become_user: ca
+  when: stat_result.stat.exists == False
+
+- name: remove obsolete files
+  file:
+    path: /etc/nginx/sites-enabled/ocsp.nginx
+    state: absent
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: restart ocsp
+  service:
+    name: ocsp
+    state: restarted
+    enabled: yes
+
+- name: restart ca
+  service:
+    name: ca
+    state: restarted
+    enabled: yes
+
+- name: restart tsa
+  service:
+    name: tsa
+    state: restarted
+    enabled: yes

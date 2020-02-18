@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:HashChain xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="http://cyber.ee/hashchain">
+    <ns2:DefaultDigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/>
+    <ns2:HashStep id="STEP0">
+        <ns2:StepRef URI="#STEP1"/>
+        <ns2:HashValue>
+            <DigestValue>0gxiWP9U6onXZbZK02laeGSAa9cFhz2+WVzpyRE62zPQYlSqgwG4dlDdhK1c/oCQBbHLuSU22arXodw5vvtX8w==</DigestValue>
+        </ns2:HashValue>
+    </ns2:HashStep>
+    <ns2:HashStep id="STEP1">
+        <ns2:DataRef URI="/message.xml">
+            <DigestValue>0gxiWP9U6onXZbZK02laeGSAa9cFhz2+WVzpyRE62zPQYlSqgwG4dlDdhK1c/oCQBbHLuSU22arXodw5vvtX8w==</DigestValue>
+        </ns2:DataRef>
+        <ns2:HashValue>
+            <DigestValue>0gxiWP9U6onXZbZK02laeGSAa9cFhz2+WVzpyRE62zPQYlSqgwG4dlDdhK1c/oCQBbHLuSU22arXodw5vvtX8w==</DigestValue>
+        </ns2:HashValue>
+    </ns2:HashStep>
+</ns2:HashChain>

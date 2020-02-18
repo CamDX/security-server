@@ -1,0 +1,76 @@
+---
+# This playbook compiles X-Road and installs the compiled packages to the defined host inventory
+
+- hosts: lxd-servers
+  roles:
+    - init-lxd
+  tags: 
+    - init
+
+- hosts: ss-servers
+  any_errors_fatal: true
+  tasks:
+    - name: RHEL-support check
+      fail:
+        msg: "Variant '{{ variant }}' does not support RHEL-servers"
+      when:
+        - (variant is defined and variant == "ee")
+        - ansible_os_family == "RedHat"
+
+- hosts: compile-servers
+  roles:
+    - compile
+    - build-packages
+  tags: 
+    - compile
+
+- hosts: ss-servers, cs-servers, cp-servers
+  roles:
+    - packages-to-local-repo
+  tags:
+    - packages
+
+- hosts: cs-servers
+  become: yes
+  become_user: root
+  roles:
+    - xroad-cs
+  tags:
+    - cs
+    - install
+  vars_files:
+    - vars_files/local_repo.yml
+
+- hosts: cp-servers
+  become: yes
+  become_user: root
+  roles:
+    - xroad-cp
+  tags:
+    - cp
+    - install
+  vars_files:
+    - vars_files/local_repo.yml
+
+- hosts: ca-servers
+  become: yes
+  become_user: root
+  pre_tasks:
+    - raw: apt install openssl
+  roles:
+    - xroad-ca
+  tags:
+    - ca
+    - install
+
+- hosts: ss-servers
+  become: yes
+  become_user: root
+  roles:
+    - xroad-ss
+  tags:
+    - ss
+    - install
+  vars_files:
+    - vars_files/local_repo.yml
+    - vars_files/ss_database.yml

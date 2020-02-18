@@ -1,0 +1,41 @@
+---
+- name: Update all packages to the latest version
+  apt:
+    force: yes
+    upgrade: full
+    update_cache: yes
+
+- name: install packages
+  apt:
+    name: "{{ items }}"
+    state: present
+  vars:
+    items:
+      - acl
+      - git
+      - curl
+      - apt-transport-https
+      - apt-utils
+      - net-tools
+
+- name: install bionic apt repo key
+  apt_key:
+    url: "{{ubuntu_18_apt_key}}"
+    state: present
+  when: package_source == "remote" and ansible_distribution_release == "bionic"
+
+- name: xroad bionic apt repository
+  apt_repository:
+    repo: "{{ubuntu_18_apt_repo}}"
+    state: present
+  when: ansible_distribution_release == "bionic"
+
+- name: enable UTF-8 locales
+  locale_gen:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ (['en_US.UTF-8'] + extra_locales | default([])) | unique }}"
+
+- name: "update apt cache"
+  apt:
+    update_cache: yes

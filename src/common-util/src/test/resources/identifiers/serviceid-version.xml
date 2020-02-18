@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<xroad:service id:objectType="SERVICE"
+        xmlns:xroad="http://x-road.eu/xsd/xroad.xsd"
+        xmlns:id="http://x-road.eu/xsd/identifiers">
+    <id:xRoadInstance>EE</id:xRoadInstance>
+    <id:memberClass>BUSINESS</id:memberClass>
+    <id:memberCode>JODA</id:memberCode>
+    <id:serviceCode>getState</id:serviceCode>
+    <id:serviceVersion>v1</id:serviceVersion>
+</xroad:service>
+

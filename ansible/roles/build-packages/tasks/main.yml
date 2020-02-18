@@ -1,0 +1,50 @@
+---
+- name: build docker image for building bionic deb packages
+  docker_image:
+    name: xroad-deb-bionic
+    path: ../src/packages/docker/deb-bionic
+    force: yes
+  when: ubuntu_releasever == "bionic"
+
+- name: build bionic deb packages in docker
+  docker_container:
+    name: xroad-deb-bionic
+    image: xroad-deb-bionic
+    state: started
+    restart: true
+    detach: false
+    cleanup: yes
+    user: "{{ ansible_user_uid }}:{{ ansible_user_gid }}"
+    env:
+        HOME: "/workspace/src/packages"
+    volumes:
+      - ..:/workspace
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+    command: "/workspace/src/packages/build-deb.sh bionic"
+  when: ubuntu_releasever == "bionic"
+
+- name: build docker image for building RPM packages
+  docker_image:
+    name: xroad-rpm
+    path: ../src/packages/docker/rpm
+    force: yes
+  tags: rpm
+
+- name: build RPM packages in docker
+  docker_container:
+    name: xroad-rpm
+    image: xroad-rpm
+    state: started
+    restart: true
+    detach: false
+    cleanup: yes
+    user: "{{ ansible_user_uid }}:{{ ansible_user_gid }}"
+    env:
+        HOME: "/workspace/src/packages"
+    volumes:
+      - ..:/workspace
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+    command: "/workspace/src/packages/build-rpm.sh"
+  tags: rpm
